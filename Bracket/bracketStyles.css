@@ -8,3 +8,7 @@ body {
 	color: #FFFFFF;
 	border-color: #90D8E7;
 }
+
+html::-webkit-scrollbar {
+  display: none;
+}

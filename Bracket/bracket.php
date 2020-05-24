@@ -20,8 +20,8 @@ $random = $_GET['order'];
 			<meta charset="utf-8" />
 	</head>
 	<body style="width:100%;height:100%;">
-		<h1> The Generated Bracket</h1>
-		<script type="text/javascript">
+		<h1 style="font-size:36px;position:fixed;top:50px;left:50px;"> The Generated Bracket</h1>
+		<script type="text/javascript"> //Back end
 			function closestPowOfTwo(num) { 
 				return parseInt("1" + "0".repeat(Math.ceil(Math.log2(num))), 2); //When num == a power of 2, it returns itself
 			}
@@ -68,10 +68,9 @@ $random = $_GET['order'];
 			}
 			
 		</script>
-		<!--script src="sketch.js"></script-->
 	
-		<div id="svgHolder" style="width:2000px;height:4000px;overflow-y:scroll;" contenteditable="true">
-			<svg id="svgMain" style="width:2000px;height:4000px;overflow-y:scroll;">
+		<div id="svgHolder" style="width:100%;height:90%;" contenteditable="true"> <!-- overflow-y:scroll; -->
+			<svg id="svgMain" style="width:100%;height:100%;">
 				<g width="200" height="50" transform="translate(100,50)">
 					<rect x="0" y="0" rx="10" ry="10" width="200" height="50" style="fill:#00341B;stroke:#90D8E7;stroke-width:1;"></rect>
 					<text id="one" x="15" y="18" fill="white">Person 1</text>
@@ -81,8 +80,7 @@ $random = $_GET['order'];
 			</svg>
 		</div>
 		
-		
-		<script type="text/javascript"> 
+		<script type="text/javascript"> //Front End
 			var itm = document.getElementById("svgMain").children[0];
 			var rounds = Math.log2(bracketSize);
 			var games = bracketSize/2;
@@ -95,9 +93,14 @@ $random = $_GET['order'];
 			var byeArray = [] //Participants who get byes are placed here with the id of their game [[id, "name"], [id, "name"], ... ]
 			var byesLeft = byeAmount;
 			
+			var farthestRight = xCoord + xMultiplier * (rounds-1);
+			var farthestDown = yCoord + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
+			
+			var gamesThisRound = games
 			for (i=0; i<rounds; i++) {
 				var temp = 0;
-				for(j=0; j<games; j++) {
+				
+				for(j=0; j<gamesThisRound; j++) {
 					var name1 = "_______";
 					var name2 = "_______";
 					var keep = true;
@@ -135,7 +138,7 @@ $random = $_GET['order'];
 					if (keep) {
 						var cln = itm.cloneNode(true);
 						var x = xCoord + xMultiplier*i;
-						var y = yCoord + yMultiplier/2 * Math.pow(2, i)-1 + (yMultiplier * Math.pow(2, i) * j);
+						var y = yCoord + yMultiplier/2 * (Math.pow(2, i)-1) + (yMultiplier * Math.pow(2, i) * j);
 
 						cln.setAttribute("transform", "translate(" + x + ", " + y + ")");
 						cln.setAttribute("name", i + "." + j);
@@ -144,9 +147,11 @@ $random = $_GET['order'];
 						document.getElementById("svgMain").appendChild(cln);
 					}
 				}
-				games = games/2;
+				gamesThisRound = gamesThisRound/2;
 			}
 			itm.setAttribute("display", "none");
+			
+			document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
 		</script>
 	</body>
 </html>
