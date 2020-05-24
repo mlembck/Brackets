@@ -20,7 +20,7 @@ $random = $_GET['order'];
 			<meta charset="utf-8" />
 	</head>
 	<body style="width:100%;height:100%;">
-		<h1 style="font-size:36px;position:fixed;top:50px;left:50px;"> The Generated Bracket</h1>
+		<h1 style="font-size:36px;position:fixed;top:25px;left:25px;"> The Generated Bracket</h1>
 		<script type="text/javascript"> //Back end
 			function closestPowOfTwo(num) { 
 				return parseInt("1" + "0".repeat(Math.ceil(Math.log2(num))), 2); //When num == a power of 2, it returns itself
@@ -93,7 +93,8 @@ $random = $_GET['order'];
 			var byeArray = [] //Participants who get byes are placed here with the id of their game [[id, "name"], [id, "name"], ... ]
 			var byesLeft = byeAmount;
 			
-			var farthestRight = xCoord + xMultiplier * (rounds-1);
+			var farthestRight = xCoord + xMultiplier * (rounds);
+			console.log("hello" + farthestRight);
 			var farthestDown = yCoord + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
 			
 			var gamesThisRound = games
