@@ -19,8 +19,10 @@ $random = $_GET['order'];
 			<meta charset="utf-8" />
 	</head>
 	<body style="width:100%;height:100%;">
-		<h1 style="font-size:36px;position:fixed;top:25px;left:25px;"> The Generated Bracket</h1>
-		<script type="text/javascript"> //Back end
+		
+		<h1>The Generated Bracket</h1>
+		
+		<script type="text/javascript" name="backend"> //Back end
 			function closestPowOfTwo(num) { 
 				return parseInt("1" + "0".repeat(Math.ceil(Math.log2(num))), 2); //When num == a power of 2, it returns itself
 			}
@@ -66,19 +68,36 @@ $random = $_GET['order'];
 			
 		</script>
 	
-		<div id="svgHolder" style="width:100%;height:90%;" > <!-- contenteditable="true" overflow-y:scroll; -->
-			<svg id="svgMain" style="width:100%;height:100%;">
+		<div id="svgHolder" > <!-- contenteditable="true" overflow-y:scroll; -->
+			<svg id="svgMain">
 				<g id="box" width="200" height="50" transform="translate(100,50)">
 					<rect x="0" y="0" rx="10" ry="10" width="200" height="50" style="fill:#00341B;stroke:#90D8E7;stroke-width:1;"></rect>
 					<text id="one" x="15" y="18" fill="white">Person 1</text>
 					<text id="two" x="15" y="43" fill="white">Person 2</text>
 					<line x1="0" y1="25" x2="200" y2="25" style="stroke:#90D8E7;stroke-width:1" />
 				</g>
-				<polyline id="line" points="0,40 40,40 40,80 80,80" style="fill:none;stroke:#90D8E7;stroke-width:1" />
+				<polyline id="line" points="0,40 40,40 40,80 80,80"/>
 			</svg>
 		</div>
 		
-		<script type="text/javascript"> //Front End
+		<div id="footer">
+			<div id="mainFooter">
+				<button type="button" id="winnerButton" disabled>
+					Declare winner
+				</button>
+				<!--button type="button" id="swap" onclick="swapFunc" disabled> 
+					Swap players
+				</button-->
+			</div>
+			
+			<div id="winnerDiv" style="border:solid black 2px;height:100%;display:none;">
+				<p>Declare a winner!</p>
+				<button id="button1"></button>
+				<button id="button2"></button>
+			</div>
+		</div>
+		
+		<script type="text/javascript" name="frontend"> //Front End
 			var box = document.getElementById("svgMain").children[0];
 			var line = document.getElementById("svgMain").children[1];
 			
@@ -173,7 +192,7 @@ $random = $_GET['order'];
 						document.getElementById("svgMain").appendChild(newBox);
 						
 						if (i != rounds-1) {
-							console.log(i);
+							//console.log(i);
 							var newLine = line.cloneNode(true);
 							var points = genPoints(x, y, i, j);
 
@@ -186,10 +205,82 @@ $random = $_GET['order'];
 				}
 				gamesThisRound = gamesThisRound/2;
 			}
-			box.setAttribute("display", "none");
-			line.setAttribute("display", "none");
+			box.remove()//box.setAttribute("display", "none");
+			line.remove()//line.setAttribute("display", "none");
 			
 			document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
+		</script>
+		
+		<script type="text/javascript" name="features">
+			var svgMain = document.getElementById("svgMain");
+			var gs = svgMain.querySelectorAll("g");
+			for (i=0;i<gs.length;i++) {
+				gs[i].onclick = clickedOnBox;
+			}
+			
+			var mainFooter = document.getElementById("mainFooter");
+			var winnerDiv = document.getElementById("winnerDiv");
+			var winnerButton = document.getElementById("winnerButton");
+			winnerButton.onclick = winnerFunc;
+			
+			var button1 = document.getElementById("button1");
+			var button2 = document.getElementById("button2");
+			button1.onclick = winnerChosen;
+			button2.onclick = winnerChosen;
+			
+			var spot;
+			
+			var name1;
+			var name2;
+		
+			function clickedOnBox() {
+				spot = this.attributes["name"].value
+				winnerButton.disabled = false;
+				
+				name1 = this.querySelector("#one").innerHTML;
+				name2 = this.querySelector("#two").innerHTML;
+			}
+			
+			function winnerFunc() {
+				winnerDiv.style.display = "inline";
+				button1.innerHTML = name1;
+				button2.innerHTML = name2;
+			}
+			
+			function winnerChosen() {
+				var spotArray = spot.split(".");
+				var currentX = parseInt(spotArray[0]);
+				var currentY = parseInt(spotArray[1]);
+				var nextX = currentX + 1;
+				var nextY = Math.floor(currentY/2);
+				var name = this.innerHTML;
+				var top = false;
+				if (currentY%2 == 0) {
+					top = true;
+				}
+				
+				var nextBox = document.getElementsByName(nextX + "." + nextY)[0];
+				
+				var texts = nextBox.querySelectorAll("text"); //This breaks at the last game!!!
+				var text = texts[1];
+				
+				if (top) {
+					text = texts[0];
+				}
+				
+				text.innerHTML = name;
+				
+				resetStuff();
+			}
+			
+			function resetStuff() {
+				name1 = "";
+				name2 = "";
+				winnerDiv.style.display = "none";
+				button1.innerHTML = name1;
+				button2.innerHTML = name2;
+			}
+			
 		</script>
 	</body>
 </html>
