@@ -16,7 +16,7 @@ $random = $_GET['order'];
 	<head>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
-			<link rel="stylesheet" type="text/css" href="styles.css">
+			<link rel="stylesheet" type="text/css" href="/Bracket/bracketStyles.css">
 			<meta charset="utf-8" />
 	</head>
 	<body style="width:100%;height:100%;">
@@ -38,6 +38,7 @@ $random = $_GET['order'];
 					var y = spreadByes(c, g);
 				}
 				return(x+y)
+				
 			}
 
 			function shuffleArray(array) { //Shuffle Array Function from the internet
@@ -52,27 +53,25 @@ $random = $_GET['order'];
 			var random = (<?php echo json_encode($random); ?> == "true");
 			var bracketSize = closestPowOfTwo(participants.length);
 			var byeAmount = bracketSize - participants.length; 
-			var byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
+			var noByes = true;
+			var byeSpread;
+			if (byeAmount == 0) {
+				byeSpread = "0".repeat(bracketSize/2)
+			}
+			else {
+				byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
+				noByes = false;
+			}
+			
 			if (random) {
 				shuffleArray(participants);
 			}
-
-			/*var temp = 0;
-			for (i=0;i<byeSpread.length;i++) {
-				if (byeSpread[i] == "1") {
-					console.log(participants[temp] + " gets a bye.");
-					temp++;
-				}
-				else if (byeSpread[i] == "0") {
-					console.log(participants[temp] + " versus " + participants[temp+1] + "!");
-					temp+=2;
-				}
-			}*/
+			
 		</script>
 		<!--script src="sketch.js"></script-->
 	
-		<div id="svgHolder" style="width:100%;height:100%;overflow-y:scroll;" contenteditable="true">
-			<svg id="svgMain" style="width:100%;height:100%;overflow-y:scroll;">
+		<div id="svgHolder" style="width:2000px;height:4000px;overflow-y:scroll;" contenteditable="true">
+			<svg id="svgMain" style="width:2000px;height:4000px;overflow-y:scroll;">
 				<g width="200" height="50" transform="translate(100,50)">
 					<rect x="0" y="0" rx="10" ry="10" width="200" height="50" style="fill:#00341B;stroke:#90D8E7;stroke-width:1;"></rect>
 					<text id="one" x="15" y="18" fill="white">Person 1</text>
@@ -85,55 +84,50 @@ $random = $_GET['order'];
 		
 		<script type="text/javascript"> 
 			var itm = document.getElementById("svgMain").children[0];
-			//console.log(bracketSize);
 			var rounds = Math.log2(bracketSize);
 			var games = bracketSize/2;
-			
 			
 			var xCoord = 100;
 			var yCoord = 50; 
 			var xMultiplier = 225;
 			var yMultiplier = 55;
 			
-			//console.log(rounds);
-			//console.log(games);
-			
-			var byeArray = []
+			var byeArray = [] //Participants who get byes are placed here with the id of their game [[id, "name"], [id, "name"], ... ]
+			var byesLeft = byeAmount;
 			
 			for (i=0; i<rounds; i++) {
 				var temp = 0;
 				for(j=0; j<games; j++) {
-					
 					var name1 = "_______";
 					var name2 = "_______";
 					var keep = true;
 					if (i==0) { //Here don't create games where there are byes, and supply names for the games in round one
 						if (byeSpread[j] == "1") {
-							//console.log(participants[temp] + " gets a bye.");
 							byeArray.push([j, participants[temp]])
-							
 							temp++;
 							keep = false;
 							
 						}
 						else if (byeSpread[j] == "0") {
-							//console.log(participants[temp] + " versus " + participants[temp+1] + "!");
 							name1 = participants[temp];
 							name2 = participants[temp+1];
 							temp+=2;
 						}
 					}
-					if (i==1) { //Supply Byes for round 2
+					if (i==1 && !noByes && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
 						nextBye = byeArray[temp][0];
 						if (j >= nextBye/2) {
 							if (nextBye%2 == 0) {
 								name1 = byeArray[temp][1];
 								temp++;
+								byesLeft--;
 							}
-							newBye = byeArray[temp][0];
-							if (nextBye == newBye-1){
-								name2 = byeArray[temp][1];
-								temp++;
+							if (byeArray[temp]) {
+								newBye = byeArray[temp][0];
+								if (nextBye == newBye-1){
+									name2 = byeArray[temp][1];
+									temp++;
+								}
 							}
 							
 						}
@@ -150,7 +144,6 @@ $random = $_GET['order'];
 						document.getElementById("svgMain").appendChild(cln);
 					}
 				}
-				//console.log(byeArray);
 				games = games/2;
 			}
 			itm.setAttribute("display", "none");
