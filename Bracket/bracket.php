@@ -5,7 +5,6 @@ $textAr = explode("\n", $text);
 $textAr = array_filter($textAr, 'trim'); // remove any extra \r characters left behind
 $random = $_GET['order'];
 
-//"translate(" + toString(xCoord+225*i) + ", " + toString(yCoords[i] + 75*j*(i+1)) + ")"
 ?>
 
 
@@ -53,14 +52,12 @@ $random = $_GET['order'];
 			var random = (<?php echo json_encode($random); ?> == "true");
 			var bracketSize = closestPowOfTwo(participants.length);
 			var byeAmount = bracketSize - participants.length; 
-			var noByes = true;
 			var byeSpread;
 			if (byeAmount == 0) {
 				byeSpread = "0".repeat(bracketSize/2)
 			}
 			else {
 				byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
-				noByes = false;
 			}
 			
 			if (random) {
@@ -69,35 +66,63 @@ $random = $_GET['order'];
 			
 		</script>
 	
-		<div id="svgHolder" style="width:100%;height:90%;" contenteditable="true"> <!-- overflow-y:scroll; -->
+		<div id="svgHolder" style="width:100%;height:90%;" > <!-- contenteditable="true" overflow-y:scroll; -->
 			<svg id="svgMain" style="width:100%;height:100%;">
-				<g width="200" height="50" transform="translate(100,50)">
+				<g id="box" width="200" height="50" transform="translate(100,50)">
 					<rect x="0" y="0" rx="10" ry="10" width="200" height="50" style="fill:#00341B;stroke:#90D8E7;stroke-width:1;"></rect>
 					<text id="one" x="15" y="18" fill="white">Person 1</text>
 					<text id="two" x="15" y="43" fill="white">Person 2</text>
 					<line x1="0" y1="25" x2="200" y2="25" style="stroke:#90D8E7;stroke-width:1" />
 				</g>
+				<polyline id="line" points="0,40 40,40 40,80 80,80" style="fill:none;stroke:#90D8E7;stroke-width:1" />
 			</svg>
 		</div>
 		
 		<script type="text/javascript"> //Front End
-			var itm = document.getElementById("svgMain").children[0];
+			var box = document.getElementById("svgMain").children[0];
+			var line = document.getElementById("svgMain").children[1];
+			
 			var rounds = Math.log2(bracketSize);
 			var games = bracketSize/2;
 			
-			var xCoord = 100;
-			var yCoord = 50; 
+			var width = parseInt(box.getAttribute("width"));
+			var height = parseInt(box.getAttribute("height"));
+			
+			var xMargin = 100;
+			var yMargin = 50; 
 			var xMultiplier = 225;
 			var yMultiplier = 55;
 			
+			var farthestRight = xMargin + xMultiplier * (rounds);
+			var farthestDown = yMargin + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
+			
 			var byeArray = [] //Participants who get byes are placed here with the id of their game [[id, "name"], [id, "name"], ... ]
 			var byesLeft = byeAmount;
-			
-			var farthestRight = xCoord + xMultiplier * (rounds);
-			console.log("hello" + farthestRight);
-			var farthestDown = yCoord + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
-			
 			var gamesThisRound = games
+			
+			function genXCoord(i) {
+				return (xMargin + xMultiplier*i);
+			}
+			
+			function genYCoord(i, j) {
+				return(yMargin + yMultiplier/2 * (Math.pow(2, i)-1) + (yMultiplier * Math.pow(2, i) * j));
+			}
+			
+			function genPoints(x, y, i, j) {
+				var nexti = i + 1;
+				var nextj = Math.floor(j/2);
+				
+				var x1 = x + width;
+				var y1 = y + height/2;
+				
+				var x4 = genXCoord(nexti);
+				var y4 = genYCoord(nexti, nextj) + height/2;
+				
+				var midX = (x1+x4)/2;
+				
+				return (x1 + "," + y1 + " " + midX + "," + y1 + " " + midX + "," + y4 + " " + x4 + "," + y4);
+			}
+			
 			for (i=0; i<rounds; i++) {
 				var temp = 0;
 				
@@ -118,7 +143,7 @@ $random = $_GET['order'];
 							temp+=2;
 						}
 					}
-					if (i==1 && !noByes && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
+					else if (i==1 && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
 						nextBye = byeArray[temp][0];
 						if (j >= nextBye/2) {
 							if (nextBye%2 == 0) {
@@ -137,20 +162,32 @@ $random = $_GET['order'];
 						}
 					}
 					if (keep) {
-						var cln = itm.cloneNode(true);
-						var x = xCoord + xMultiplier*i;
-						var y = yCoord + yMultiplier/2 * (Math.pow(2, i)-1) + (yMultiplier * Math.pow(2, i) * j);
+						var newBox = box.cloneNode(true);
+						var x = genXCoord(i);
+						var y = genYCoord(i,j);
+						
+						newBox.setAttribute("transform", "translate(" + x + ", " + y + ")");
+						newBox.setAttribute("name", i + "." + j);
+						newBox.querySelector('#one').innerHTML = name1;
+						newBox.querySelector('#two').innerHTML = name2;
+						document.getElementById("svgMain").appendChild(newBox);
+						
+						if (i != rounds-1) {
+							console.log(i);
+							var newLine = line.cloneNode(true);
+							var points = genPoints(x, y, i, j);
 
-						cln.setAttribute("transform", "translate(" + x + ", " + y + ")");
-						cln.setAttribute("name", i + "." + j);
-						cln.querySelector('#one').innerHTML = name1;
-						cln.querySelector('#two').innerHTML = name2;
-						document.getElementById("svgMain").appendChild(cln);
+							newLine.setAttribute("points", points);
+							newLine.setAttribute("id", i + "." + j);
+							document.getElementById("svgMain").appendChild(newLine);
+						}
+						
 					}
 				}
 				gamesThisRound = gamesThisRound/2;
 			}
-			itm.setAttribute("display", "none");
+			box.setAttribute("display", "none");
+			line.setAttribute("display", "none");
 			
 			document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
 		</script>
