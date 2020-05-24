@@ -101,6 +101,8 @@ $random = $_GET['order'];
 			var box = document.getElementById("svgMain").children[0];
 			var line = document.getElementById("svgMain").children[1];
 			
+			var emptyLine = " "
+			
 			var rounds = Math.log2(bracketSize);
 			var games = bracketSize/2;
 			
@@ -146,8 +148,8 @@ $random = $_GET['order'];
 				var temp = 0;
 				
 				for(j=0; j<gamesThisRound; j++) {
-					var name1 = "_______";
-					var name2 = "_______";
+					var name1 = emptyLine;
+					var name2 = emptyLine;
 					var keep = true;
 					if (i==0) { //Here don't create games where there are byes, and supply names for the games in round one
 						if (byeSpread[j] == "1") {
@@ -242,9 +244,14 @@ $random = $_GET['order'];
 			}
 			
 			function winnerFunc() {
-				winnerDiv.style.display = "inline";
-				button1.innerHTML = name1;
-				button2.innerHTML = name2;
+				if (name1 != emptyLine && name2 != emptyLine) {
+					winnerDiv.style.display = "inline";
+					button1.innerHTML = name1;
+					button2.innerHTML = name2;
+				}
+				else {
+					alert("Update earlier games first");
+				}
 			}
 			
 			function winnerChosen() {
@@ -276,9 +283,11 @@ $random = $_GET['order'];
 			function resetStuff() {
 				name1 = "";
 				name2 = "";
+				spot = "";
 				winnerDiv.style.display = "none";
 				button1.innerHTML = name1;
 				button2.innerHTML = name2;
+				winnerButton.disabled = true;
 			}
 			
 		</script>
