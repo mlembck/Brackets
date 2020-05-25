@@ -85,16 +85,23 @@ $random = $_GET['order'];
 				<button type="button" id="winnerButton" disabled>
 					Declare winner
 				</button>
-				<!--button type="button" id="swap" onclick="swapFunc" disabled> 
+				<button type="button" id="swapButton" disabled> 
 					Swap players
-				</button-->
+				</button>
 			</div>
 			
 			<div id="winnerDiv" style="border:solid black 2px;height:100%;display:none;">
 				<p>Declare a winner!</p>
-				<button id="button1"></button>
-				<button id="button2"></button>
+				<button id="winButton1"></button>
+				<button id="winButton2"></button>
 			</div>
+			
+			<div id="swapDiv" style="border:solid black 2px;height:100%;display:none;">
+				<p>Swap a player!</p>
+				<button id="swapButton1" data-pos="top"></button>
+				<button id="swapButton2" data-pos="bot"></button>
+			</div>
+			
 		</div>
 		
 		<script type="text/javascript" name="frontend"> //Front End
@@ -213,84 +220,7 @@ $random = $_GET['order'];
 			document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
 		</script>
 		
-		<script type="text/javascript" name="features">
-			var svgMain = document.getElementById("svgMain");
-			var gs = svgMain.querySelectorAll("g");
-			for (i=0;i<gs.length;i++) {
-				gs[i].onclick = clickedOnBox;
-			}
-			
-			var mainFooter = document.getElementById("mainFooter");
-			var winnerDiv = document.getElementById("winnerDiv");
-			var winnerButton = document.getElementById("winnerButton");
-			winnerButton.onclick = winnerFunc;
-			
-			var button1 = document.getElementById("button1");
-			var button2 = document.getElementById("button2");
-			button1.onclick = winnerChosen;
-			button2.onclick = winnerChosen;
-			
-			var spot;
-			
-			var name1;
-			var name2;
-		
-			function clickedOnBox() {
-				spot = this.attributes["name"].value
-				winnerButton.disabled = false;
-				
-				name1 = this.querySelector("#one").innerHTML;
-				name2 = this.querySelector("#two").innerHTML;
-			}
-			
-			function winnerFunc() {
-				if (name1 != emptyLine && name2 != emptyLine) {
-					winnerDiv.style.display = "inline";
-					button1.innerHTML = name1;
-					button2.innerHTML = name2;
-				}
-				else {
-					alert("Update earlier games first");
-				}
-			}
-			
-			function winnerChosen() {
-				var spotArray = spot.split(".");
-				var currentX = parseInt(spotArray[0]);
-				var currentY = parseInt(spotArray[1]);
-				var nextX = currentX + 1;
-				var nextY = Math.floor(currentY/2);
-				var name = this.innerHTML;
-				var top = false;
-				if (currentY%2 == 0) {
-					top = true;
-				}
-				
-				var nextBox = document.getElementsByName(nextX + "." + nextY)[0];
-				
-				var texts = nextBox.querySelectorAll("text"); //This breaks at the last game!!!
-				var text = texts[1];
-				
-				if (top) {
-					text = texts[0];
-				}
-				
-				text.innerHTML = name;
-				
-				resetStuff();
-			}
-			
-			function resetStuff() {
-				name1 = "";
-				name2 = "";
-				spot = "";
-				winnerDiv.style.display = "none";
-				button1.innerHTML = name1;
-				button2.innerHTML = name2;
-				winnerButton.disabled = true;
-			}
-			
-		</script>
+		<script src="/Bracket/features.js"></script>
 	</body>
 </html>
 
