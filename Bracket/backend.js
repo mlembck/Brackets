@@ -24,78 +24,81 @@ function shuffleArray(array) { //Shuffle Array Function from the internet
 	}
 }
 
-//Simple Declarations
-bracketSize = closestPowOfTwo(participants.length);
-var byeAmount = bracketSize - participants.length; 
-var byeSpread;
-if (byeAmount == 0) {
-	byeSpread = "0".repeat(bracketSize/2)
-}
-else {
-	byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
-}
-
-if (random) {
-	shuffleArray(participants);
-}
-
-var rounds = Math.log2(bracketSize);
-var games = bracketSize/2;
-
-var bracketToBeMade = [];
-var byeArray = []
-var byesLeft = byeAmount;
-var gamesThisRound = games;
-var emptyLine = "";
-
-for (i=0; i<rounds; i++) { //Loops through every round
-	var temp = 0;
-	var currentBracket = [];
-	for(j=0; j<gamesThisRound; j++) { //Loops through every game per round
-		var name1 = emptyLine;
-		var name2 = emptyLine;
-		var keep = true;
-		if (i==0) { //Here don't create games where there are byes, and supply names for the games in round one
-			if (byeSpread[j] == "1") {
-				currentBracket.push([j, "bye"]);
-				byeArray.push([j, participants[temp]])
-				temp++;
-				keep = false;
-
-			}
-			else if (byeSpread[j] == "0") {
-				name1 = participants[temp];
-				name2 = participants[temp+1];
-				temp+=2;
-			}
-		}
-		else if (i==1 && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
-			nextBye = byeArray[temp][0];
-			if (j >= nextBye/2) {
-				if (nextBye%2 == 0) {
-					name1 = byeArray[temp][1];
-					temp++;
-					byesLeft--;
-				}
-				if (byeArray[temp]) {
-					newBye = byeArray[temp][0];
-					if (nextBye == newBye-1){
-						name2 = byeArray[temp][1];
-						temp++;
-					}
-				}
-
-			}
-		}
-		if (keep) {
-			currentBracket.push([j, name1, name2]);
-		}
+if (participants != null || json == null) {
+	//Simple Declarations
+	bracketSize = closestPowOfTwo(participants.length);
+	var byeAmount = bracketSize - participants.length; 
+	var byeSpread;
+	if (byeAmount == 0) {
+		byeSpread = "0".repeat(bracketSize/2)
 	}
-	bracketToBeMade.push(currentBracket);
-	gamesThisRound = gamesThisRound/2;
-}
+	else {
+		byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
+	}
 
-console.log(JSON.parse(JSON.stringify(bracketToBeMade)));
+	if (random) {
+		shuffleArray(participants);
+	}
+
+	var rounds = Math.log2(bracketSize);
+	var games = bracketSize/2;
+
+	var bracketToBeMade = [];
+	var byeArray = []
+	var byesLeft = byeAmount;
+	var gamesThisRound = games;
+	var emptyLine = "";
+
+
+	for (i=0; i<rounds; i++) { //Loops through every round
+		var temp = 0;
+		var currentBracket = [];
+		for(j=0; j<gamesThisRound; j++) { //Loops through every game per round
+			var name1 = emptyLine;
+			var name2 = emptyLine;
+			var keep = true;
+			if (i==0) { //Here don't create games where there are byes, and supply names for the games in round one
+				if (byeSpread[j] == "1") {
+					currentBracket.push([j, "bye"]);
+					byeArray.push([j, participants[temp]])
+					temp++;
+					keep = false;
+
+				}
+				else if (byeSpread[j] == "0") {
+					name1 = participants[temp];
+					name2 = participants[temp+1];
+					temp+=2;
+				}
+			}
+			else if (i==1 && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
+				nextBye = byeArray[temp][0];
+				if (j >= nextBye/2) {
+					if (nextBye%2 == 0) {
+						name1 = byeArray[temp][1];
+						temp++;
+						byesLeft--;
+					}
+					if (byeArray[temp]) {
+						newBye = byeArray[temp][0];
+						if (nextBye == newBye-1){
+							name2 = byeArray[temp][1];
+							temp++;
+						}
+					}
+
+				}
+			}
+			if (keep) {
+				currentBracket.push([j, name1, name2]);
+			}
+		}
+		bracketToBeMade.push(currentBracket);
+		gamesThisRound = gamesThisRound/2;
+	}
+
+}
+//console.log(JSON.parse(JSON.stringify(bracketToBeMade)));
 
 /*
 

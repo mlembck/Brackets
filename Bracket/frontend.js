@@ -32,16 +32,24 @@ function genPoints(x, y, i, j) {
 	return (x1 + "," + y1 + " " + midX + "," + y1 + " " + midX + "," + y4 + " " + x4 + "," + y4);
 }
 
+var firstTime = true;
+var theCurrentBracket;
+
+
 function createBracket(bracket) {
+	theCurrentBracket = bracket;
+	
 	var rounds = bracket.length;
 	var games = bracket[0].length;
 	
-	prepSvgMain();
+	resetSvgMain();
 	
+	//onsole.log(bracket.length + " < - Bracket Length");
 	for (i=0; i<bracket.length; i++) { //Loops through every round
 		var temp = 0;
-		var currentBracket = bracketToBeMade[i];
+		var currentBracket = bracket[i];
 		
+		//console.log(i + " " + currentBracket);
 		for(j=0; j<currentBracket.length; j++) { //Loops through every game per round
 			var currentGame = currentBracket[j];
 			
@@ -79,18 +87,25 @@ function createBracket(bracket) {
 	var farthestDown = yMargin + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
 	
 	document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
+	
+	if (firstTime) {
+		firstTime = false;
+	}
+	else {
+		addOnclicks();
+	}
 }
 
-function prepSvgMain() {
+function resetSvgMain() {
 	console.log("in prep");
 	box.setAttribute("display", "inline")
 	line.setAttribute("display", "inline")
 	
 	var children = document.getElementById("svgMain").children;
-	console.log(children);
+	//console.log(children);
 	for (i=children.length-1;i>0;i--) {
 		if (children[i].id != "box" && children[i].id != "connector") {
-			console.log("Removing: " + children[i].id);
+			//console.log("Removing: " + children[i].id);
 			children[i].remove();
 			
 		}
@@ -101,8 +116,12 @@ function prepSvgMain() {
 	}
 }
 
-createBracket(bracketToBeMade);
-prepSvgMain();
+
+if (json == null) {
+	createBracket(bracketToBeMade);
+}
+
+//resetSvgMain();
 
 
 

@@ -1,9 +1,21 @@
 <?php 
 
-$text = trim($_GET['message']);
-$textAr = explode("\n", $text);
-$textAr = array_filter($textAr, 'trim'); // remove any extra \r characters left behind
-$random = $_GET['order'];
+$json;
+
+if ($_GET['message'] != null) {
+	$text = trim($_GET['message']);
+	$textAr = explode("\n", $text);
+	$textAr = array_filter($textAr, 'trim'); // remove any extra \r characters left behind
+	$random = $_GET['order'];
+}
+else {
+	echo "ha";
+	if ($_POST['json'] != null) {
+		$json = $_POST['json'];
+	}
+}
+
+
 
 ?>
 
@@ -20,11 +32,16 @@ $random = $_GET['order'];
 	</head>
 	<body style="width:100%;height:100%;">
 		
-		<h1>The Generated Bracket</h1>
+		<h1 id="heading">The Generated Bracket</h1>
 		
 		<script type="text/javascript" name="backend"> //Back end
 			var participants = <?php echo json_encode($textAr); ?>;
 			var random = (<?php echo json_encode($random); ?> == "true");
+			<?php 
+				if ($json != "") {
+					echo "var json = '" . $_POST['json'] . "';"; 
+				}
+			?>
 		</script>
 	
 		<div id="svgHolder" > <!-- contenteditable="true" overflow-y:scroll; -->
@@ -47,21 +64,27 @@ $random = $_GET['order'];
 				<button type="button" id="swapButton" disabled> 
 					Swap players
 				</button>
-				<button type="button" id="cancelButton" onclick="cancel()">
+				<button type="button" id="cancelButton" onclick="cancel()" disabled>
 					Cancel
 				</button>
+				<button type="button" id="loadButton" onclick="load()">
+					Load
+				</button>
+				
+				<button type="button" id="saveButton" onclick="save()">
+					Save
+				</button>
 			</div>
-			
-			<div id="winnerDiv" style="border:solid black 2px;height:100%;display:none;">
-				<p>Declare a winner!</p>
-				<button id="winButton1"></button>
-				<button id="winButton2"></button>
-			</div>
-			
-			<div id="swapDiv" style="border:solid black 2px;height:100%;display:none;">
-				<p>Swap a player!</p>
-				<button id="swapButton1" data-pos="top"></button>
-				<button id="swapButton2" data-pos="bot"></button>
+			<div id="sideFooter">
+				<div id="winnerDiv" style="height:auto;width:auto;display:none;">
+					<button id="winButton1"></button>
+					<button id="winButton2"></button>
+				</div>
+
+				<div id="swapDiv" style="height:100%;display:none;height:auto;width:auto;">
+					<button id="swapButton1" data-pos="top"></button>
+					<button id="swapButton2" data-pos="bot"></button>
+				</div>
 			</div>
 			
 		</div>
@@ -74,6 +97,14 @@ $random = $_GET['order'];
 		<script src="/Bracket/backend.js"></script>
 		<script src="/Bracket/frontend.js"></script>
 		<script src="/Bracket/features.js"></script>
+		<script type="text/javascript">
+			<?php 
+				if ($json != "") {
+					echo "createBracket(JSON.parse(json));" ; 
+				}
+			?>
+			
+		</script>
 	</body>
 </html>
 

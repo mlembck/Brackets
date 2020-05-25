@@ -14,7 +14,7 @@ html::-webkit-scrollbar {
 }
 
 h1 {
-	font-size:36px;
+	font-size:2vw;
 	position:fixed;
 	top:25px;
 	left:25px;
@@ -41,5 +41,36 @@ polyline {
 #footer {
 	width:100%;
 	height:10%;
-	border:solid black 3px;
+}
+
+.col4 {
+	height: auto;
+	width: 33%;
+}
+button {
+	height: auto;
+	width: auto;
+	font-size:1vw;
+	padding: 2.5vh;
+	margin:3vw;
+	border-radius: 2vh;
+	stroke:#90D8E7;
+	background-color:#115968;
+	color:#FFFFFF;
+	border: solid #66CDB4 5px;
+	margin-top:0;
+}
+
+button:disabled {
+	background-color:gray;
+}
+
+#sideFooter {
+	width:50%;
+	float:left;
+}
+
+#mainFooter {
+	width:50%;
+	float:left;
 }
