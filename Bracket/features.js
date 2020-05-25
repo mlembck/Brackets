@@ -43,21 +43,12 @@ function winnerChosen() {
 	var nextX = currentX + 1;
 	var nextY = Math.floor(currentY/2);
 	var name = this.innerHTML;
-	var top = false;
+	var pos = "bot";
 	if (currentY%2 == 0) {
-		top = true;
+		pos = "top";
 	}
-
-	var nextBox = document.getElementsByName(nextX + "." + nextY)[0];
-
-	var texts = nextBox.querySelectorAll("text"); //This breaks at the last game!!!
-	var text = texts[1];
-
-	if (top) {
-		text = texts[0];
-	}
-
-	text.innerHTML = name;
+	
+	setName(name, nextX + "." + nextY, pos)
 
 	resetStuff();
 }
@@ -139,7 +130,6 @@ function resetStuff() {
 }
 
 function setName(name, spot, pos) {
-	console.log('g[name="'+ spot.trim() +'"]');
 	var theebox = document.querySelector('g[name="'+ spot.trim() +'"]');	
 	var texts = theebox.querySelectorAll("text"); //This breaks at the last game!!!
 	var text = texts[1];
@@ -149,4 +139,8 @@ function setName(name, spot, pos) {
 	}
 
 	text.innerHTML = name;
+}
+
+function cancel() {
+	resetStuff()
 }

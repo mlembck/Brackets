@@ -23,49 +23,8 @@ $random = $_GET['order'];
 		<h1>The Generated Bracket</h1>
 		
 		<script type="text/javascript" name="backend"> //Back end
-			function closestPowOfTwo(num) { 
-				return parseInt("1" + "0".repeat(Math.ceil(Math.log2(num))), 2); //When num == a power of 2, it returns itself
-			}
-
-			function spreadByes(byes, games) {
-				if (byes == 1) {  //When there is only 1 bye to split among multiple games, it is given to the first of the bunch
-					return("1" + "0".repeat(games-1));
-				}
-				else {								//this continues to split the function until there is only 1 bye left
-					var f = Math.floor(byes/2); 
-					var c = Math.ceil(byes/2);
-					var g = games/2;
-					var x = spreadByes(f, g);
-					var y = spreadByes(c, g);
-				}
-				return(x+y)
-				
-			}
-
-			function shuffleArray(array) { //Shuffle Array Function from the internet
-				for (let i = array.length - 1; i > 0; i--) {
-					const j = Math.floor(Math.random() * (i + 1));
-					[array[i], array[j]] = [array[j], array[i]];
-				}
-			}
-
-			//Simple Declarations
 			var participants = <?php echo json_encode($textAr); ?>;
 			var random = (<?php echo json_encode($random); ?> == "true");
-			var bracketSize = closestPowOfTwo(participants.length);
-			var byeAmount = bracketSize - participants.length; 
-			var byeSpread;
-			if (byeAmount == 0) {
-				byeSpread = "0".repeat(bracketSize/2)
-			}
-			else {
-				byeSpread = spreadByes(byeAmount, bracketSize/2); //The first round has an amount of games equal to half the amount of players.
-			}
-			
-			if (random) {
-				shuffleArray(participants);
-			}
-			
 		</script>
 	
 		<div id="svgHolder" > <!-- contenteditable="true" overflow-y:scroll; -->
@@ -76,7 +35,7 @@ $random = $_GET['order'];
 					<text id="two" x="15" y="43" fill="white">Person 2</text>
 					<line x1="0" y1="25" x2="200" y2="25" style="stroke:#90D8E7;stroke-width:1" />
 				</g>
-				<polyline id="line" points="0,40 40,40 40,80 80,80"/>
+				<polyline id="connector" points="0,40 40,40 40,80 80,80"/>
 			</svg>
 		</div>
 		
@@ -87,6 +46,9 @@ $random = $_GET['order'];
 				</button>
 				<button type="button" id="swapButton" disabled> 
 					Swap players
+				</button>
+				<button type="button" id="cancelButton" onclick="cancel()">
+					Cancel
 				</button>
 			</div>
 			
@@ -105,121 +67,12 @@ $random = $_GET['order'];
 		</div>
 		
 		<script type="text/javascript" name="frontend"> //Front End
-			var box = document.getElementById("svgMain").children[0];
-			var line = document.getElementById("svgMain").children[1];
 			
-			var emptyLine = " "
-			
-			var rounds = Math.log2(bracketSize);
-			var games = bracketSize/2;
-			
-			var width = parseInt(box.getAttribute("width"));
-			var height = parseInt(box.getAttribute("height"));
-			
-			var xMargin = 100;
-			var yMargin = 50; 
-			var xMultiplier = 225;
-			var yMultiplier = 55;
-			
-			var farthestRight = xMargin + xMultiplier * (rounds);
-			var farthestDown = yMargin + yMultiplier/2 * (Math.pow(2, 0)-1) + (yMultiplier * (Math.pow(2, 0)) * (games));
-			
-			var byeArray = [] //Participants who get byes are placed here with the id of their game [[id, "name"], [id, "name"], ... ]
-			var byesLeft = byeAmount;
-			var gamesThisRound = games
-			
-			function genXCoord(i) {
-				return (xMargin + xMultiplier*i);
-			}
-			
-			function genYCoord(i, j) {
-				return(yMargin + yMultiplier/2 * (Math.pow(2, i)-1) + (yMultiplier * Math.pow(2, i) * j));
-			}
-			
-			function genPoints(x, y, i, j) {
-				var nexti = i + 1;
-				var nextj = Math.floor(j/2);
-				
-				var x1 = x + width;
-				var y1 = y + height/2;
-				
-				var x4 = genXCoord(nexti);
-				var y4 = genYCoord(nexti, nextj) + height/2;
-				
-				var midX = (x1+x4)/2;
-				
-				return (x1 + "," + y1 + " " + midX + "," + y1 + " " + midX + "," + y4 + " " + x4 + "," + y4);
-			}
-			
-			for (i=0; i<rounds; i++) {
-				var temp = 0;
-				
-				for(j=0; j<gamesThisRound; j++) {
-					var name1 = emptyLine;
-					var name2 = emptyLine;
-					var keep = true;
-					if (i==0) { //Here don't create games where there are byes, and supply names for the games in round one
-						if (byeSpread[j] == "1") {
-							byeArray.push([j, participants[temp]])
-							temp++;
-							keep = false;
-							
-						}
-						else if (byeSpread[j] == "0") {
-							name1 = participants[temp];
-							name2 = participants[temp+1];
-							temp+=2;
-						}
-					}
-					else if (i==1 && byesLeft > 0) { //Supply Byes for round 2 but only if there are byes left to be placed
-						nextBye = byeArray[temp][0];
-						if (j >= nextBye/2) {
-							if (nextBye%2 == 0) {
-								name1 = byeArray[temp][1];
-								temp++;
-								byesLeft--;
-							}
-							if (byeArray[temp]) {
-								newBye = byeArray[temp][0];
-								if (nextBye == newBye-1){
-									name2 = byeArray[temp][1];
-									temp++;
-								}
-							}
-							
-						}
-					}
-					if (keep) {
-						var newBox = box.cloneNode(true);
-						var x = genXCoord(i);
-						var y = genYCoord(i,j);
-						
-						newBox.setAttribute("transform", "translate(" + x + ", " + y + ")");
-						newBox.setAttribute("name", i + "." + j);
-						newBox.querySelector('#one').innerHTML = name1;
-						newBox.querySelector('#two').innerHTML = name2;
-						document.getElementById("svgMain").appendChild(newBox);
-						
-						if (i != rounds-1) {
-							//console.log(i);
-							var newLine = line.cloneNode(true);
-							var points = genPoints(x, y, i, j);
-
-							newLine.setAttribute("points", points);
-							newLine.setAttribute("id", i + "." + j);
-							document.getElementById("svgMain").appendChild(newLine);
-						}
-						
-					}
-				}
-				gamesThisRound = gamesThisRound/2;
-			}
-			box.remove()//box.setAttribute("display", "none");
-			line.remove()//line.setAttribute("display", "none");
-			
-			document.getElementById("svgMain").setAttribute("viewBox", "0 0 " + farthestRight + " " + farthestDown);
 		</script>
 		
+		
+		<script src="/Bracket/backend.js"></script>
+		<script src="/Bracket/frontend.js"></script>
 		<script src="/Bracket/features.js"></script>
 	</body>
 </html>
